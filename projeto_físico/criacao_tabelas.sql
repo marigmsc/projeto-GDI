@@ -6,13 +6,6 @@ CREATE TABLE USUARIO(
     telefone2 VARCHAR(14)
 );
 
-CREATE TABLE CONTA_BANCARIA (
-    agencia VARCHAR(5), 
-    conta VARCHAR(8), 
-    CPF VARCHAR(20),
-    PRIMARY KEY (agencia, conta)
-);
-
 CREATE TABLE CRIADOR (
     CPF VARCHAR(20) PRIMARY KEY, 
     agencia VARCHAR(5) NOT NULL, 
@@ -27,14 +20,12 @@ CREATE TABLE PREMIUM (
     CONSTRAINT premium_fk FOREIGN KEY (CPF) REFERENCES USUARIO(CPF)
 );
 
-CREATE TABLE EVENTO (
-    CPF VARCHAR(20), 
-    numEvento NUMBER, 
-    data DATE, 
-    CEP VARCHAR(9), 
-    numero NUMBER,
-    PRIMARY KEY (CPF, numEvento),
-    CONSTRAINT CPF_artista_evento_fk FOREIGN KEY (CPF) REFERENCES CRIADOR(CPF)
+CREATE TABLE MUSICA (
+    id_musica NUMBER PRIMARY KEY, 
+    id_album NUMBER NOT NULL, 
+    titulo VARCHAR(45), 
+    duracao NUMBER, 
+    capa VARCHAR(45)
 );
 
 CREATE TABLE ALBUM (
@@ -47,30 +38,12 @@ CREATE TABLE ALBUM (
     CONSTRAINT CPF_criador_album_fk FOREIGN KEY (CPF) REFERENCES CRIADOR(CPF)
 );
 
-CREATE TABLE MUSICA (
-    id_musica NUMBER PRIMARY KEY, 
-    id_album NUMBER NOT NULL, 
-    titulo VARCHAR(45), 
-    duracao NUMBER, 
-    capa VARCHAR(45)
-);
-
 CREATE TABLE PLAYLIST(
     id_playlist NUMBER PRIMARY KEY,
     titulo VARCHAR(45),
     capa VARCHAR(45),
     genero VARCHAR(45),
     total_faixas NUMBER
-);
-
-CREATE TABLE ASSINATURA(
-    id_assinatura NUMBER PRIMARY KEY,
-    tipo VARCHAR(45),
-    valor NUMBER
-);
-
-CREATE TABLE DESCONTO(
-    id_desconto NUMBER PRIMARY KEY
 );
 
 CREATE TABLE FAZ(
@@ -99,6 +72,11 @@ CREATE TABLE SEGUE(
     CONSTRAINT seguidor_fk FOREIGN KEY (seguidor) REFERENCES USUARIO(CPF)
 );
 
+CREATE TABLE DESCONTO(
+    id_desconto NUMBER PRIMARY KEY,
+    percentual  NUMBER(5,2)
+);
+
 CREATE TABLE ASSINA(
     CPF VARCHAR(20), 
     id_assinatura NUMBER, 
@@ -107,6 +85,29 @@ CREATE TABLE ASSINA(
     CONSTRAINT CPF_usuario_assina_fk FOREIGN KEY (CPF) REFERENCES PREMIUM(CPF),
     CONSTRAINT id_assinatura_fk FOREIGN KEY (id_assinatura) REFERENCES ASSINATURA(id_assinatura),
     CONSTRAINT id_desconto_fk FOREIGN KEY (id_desconto) REFERENCES DESCONTO(id_desconto)
+);
+
+CREATE TABLE ASSINATURA(
+    id_assinatura NUMBER PRIMARY KEY,
+    tipo VARCHAR(45),
+    valor NUMBER
+);
+
+CREATE TABLE EVENTO (
+    CPF VARCHAR(20), 
+    numEvento NUMBER, 
+    data DATE, 
+    CEP VARCHAR(9), 
+    numero NUMBER,
+    PRIMARY KEY (CPF, numEvento),
+    CONSTRAINT CPF_artista_evento_fk FOREIGN KEY (CPF) REFERENCES CRIADOR(CPF)
+);
+
+CREATE TABLE CONTA_BANCARIA (
+    agencia VARCHAR(5), 
+    conta VARCHAR(8), 
+    CPF VARCHAR(20),
+    PRIMARY KEY (agencia, conta)
 );
 
 
@@ -119,7 +120,7 @@ INSERT INTO USUARIO (CPF, nome, email, telefone1, telefone2)
 VALUES
 ('111.222.333-44', 'Mariana Diniz',    'mari23@gmail.com',            '(11) 9834-5210', '(11) 9934-6871'),
 ('222.333.444-55', 'João Tavares',     'jo_66_tavares@outlook.com',   '(21) 9456-7980', '(21) 9067-4412'),
-('333.444.555-66', 'Ana Montenegro',   'anng34@gmail.com',            '(31) 9120-3344',  NULL),  -- Telefone2 nulo
+('333.444.555-66', 'Ana Montenegro',   'anng34@gmail.com',            '(31) 9120-3344',  NULL),
 ('444.555.666-77', 'Pedro Antunes',    'pedro_ant223@hotmail.com',    '(41) 9891-2243', '(41) 9732-6781'),
 ('555.666.777-88', 'Rafaela Moura',    'rafam_1@gmail.com',           '(48) 9342-8776', '(48) 9123-6722'),
 ('666.777.888-99', 'Lucas Pereira',    'luccasppp@hotmail.com',       '(61) 9665-4432', '(61) 9001-5589'),
@@ -184,7 +185,6 @@ VALUES
 
 -----------------------------------------------------------
 -- TABELA: ALBUM
--- Adicionamos os álbuns 9 e 10 p/ criadores 111.222.333-44 e 444.555.666-77
 -----------------------------------------------------------
 INSERT INTO ALBUM (id_album, CPF, titulo, capa, genero, total_faixas)
 VALUES
@@ -201,7 +201,6 @@ VALUES
 
 -----------------------------------------------------------
 -- TABELA: MUSICA
--- Adicionamos músicas 9, 10, 11 p/ os álbuns extras
 -----------------------------------------------------------
 INSERT INTO MUSICA (id_musica, id_album, titulo, duracao, capa)
 VALUES
@@ -248,20 +247,19 @@ VALUES
 -----------------------------------------------------------
 -- TABELA: DESCONTO
 -----------------------------------------------------------
-INSERT INTO DESCONTO (id_desconto)
+INSERT INTO DESCONTO (id_desconto, percentual)
 VALUES
-(1),
-(2),
-(3),
-(4),
-(5),
-(6),
-(7),
-(8);
+(1, 5.00),
+(2, 10.00),
+(3, 15.50),
+(4, 20.00),
+(5, 25.00),
+(6, 30.00),
+(7, 35.00),
+(8, 40.00);
 
 -----------------------------------------------------------
 -- TABELA: FAZ
--- Incluímos também as publicações das novas músicas (9, 10, 11)
 -----------------------------------------------------------
 INSERT INTO FAZ (id_musica, CPF, data_publicada)
 VALUES
@@ -293,7 +291,6 @@ VALUES
 
 -----------------------------------------------------------
 -- TABELA: SEGUE
--- Acrescentamos mais uma linha: ('111.222.333-44','777.888.999-00')
 -----------------------------------------------------------
 INSERT INTO SEGUE (seguido, seguidor)
 VALUES
@@ -305,7 +302,7 @@ VALUES
 ('666.777.888-99', '444.555.666-77'),
 ('777.888.999-00', '888.999.000-11'),
 ('888.999.000-11', '222.333.444-55'),
-('111.222.333-44', '777.888.999-00'); -- nova linha
+('111.222.333-44', '777.888.999-00');
 
 -----------------------------------------------------------
 -- TABELA: ASSINA
