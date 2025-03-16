@@ -123,3 +123,40 @@ WHERE U.CPF NOT IN (
     SELECT SEGUIDO
     FROM SEGUE
 );
+
+
+----------- PLSQL -----------------
+
+CREATE OR REPLACE PROCEDURE ContarAlbunsPorCriador(cpf_criador IN VARCHAR2)
+IS
+    total_albuns NUMBER;
+BEGIN
+    -- Conta quantos álbuns o criador tem na tabela ALBUM
+    SELECT COUNT(*)
+    INTO total_albuns
+    FROM ALBUM
+    WHERE CPF = cpf_criador;
+
+    -- Exibe o total de álbuns no console
+    DBMS_OUTPUT.PUT_LINE('Total de Álbuns: ' || total_albuns);
+END;
+
+-- Executa o procedimento para um criador específico
+EXEC ContarAlbunsPorCriador('111.222.333-44');
+
+-- Trigger
+
+CREATE OR REPLACE TRIGGER atualiza_faixas_album
+AFTER INSERT ON MUSICA
+FOR EACH ROW
+BEGIN
+    -- Atualiza o total de faixas no álbum relacionado
+    UPDATE ALBUM
+    SET total_faixas = total_faixas + 1
+    WHERE id_album = :NEW.id_album;
+END;
+
+-- Teste
+INSERT INTO MUSICA (id_musica, id_album, titulo, duracao, capa)
+VALUES (12, 1, 'Nova Faixa', 210, 'nova_faixa_album.jpg');
+
