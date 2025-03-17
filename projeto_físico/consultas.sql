@@ -8,7 +8,15 @@ FROM ALBUM A
 GROUP BY A.CPF
 HAVING COUNT(*) > 1;
 
-
+--"Nome do Criador que possui o maior número de eventos publicados."
+SELECT U.NOME, COUNT(*) AS total_eventos
+FROM EVENTO E INNER JOIN USUARIO U ON E.CPF=U.CPF
+GROUP BY U.NOME
+HAVING total_eventos = (
+    SELECT MAX(COUNT(*)) 
+    FROM EVENTO
+    GROUP BY CPF
+);
 ---------------------------------------------------------
 -- 2) OUTER JOIN
 -- "Mostrar o nome de todos os criadores e o título do álbum (se existir).
@@ -20,6 +28,12 @@ FROM CRIADOR C
      INNER JOIN USUARIO U     ON C.CPF = U.CPF
 ORDER BY U.NOME;
 
+-- "Listar o nome de todos os usuários e por quem eles são seguidos (se houver seguidores)."
+SELECT U1.nome AS seguido,
+       U2.nome AS seguidor
+FROM USUARIO U1
+    LEFT OUTER JOIN SEGUE S ON U1.CPF = S.seguido
+    LEFT OUTER JOIN USUARIO U2 ON S.seguidor = U2.CPF;
 
 ---------------------------------------------------------
 -- 3) SEMI-JOIN (EXISTS)
@@ -33,9 +47,19 @@ WHERE EXISTS (
     WHERE F.CPF = C.CPF
 );
 
+-- "Nome dos usuários que são criadores"
+SELECT U.nome
+FROM USUARIO U
+WHERE EXISTS (
+    SELECT *
+    FROM CRIADOR C
+    WHERE C.CPF = U.CPF
+);
+
 
 ---------------------------------------------------------
--- 4) "CPF dos criadores que nunca publicaram nenhuma música."
+-- 4) ANTI-JOIN(NOT EXISTS) 
+-- "CPF dos criadores que nunca publicaram nenhuma música."
 ---------------------------------------------------------
 SELECT C.CPF
 FROM CRIADOR C
@@ -45,6 +69,14 @@ WHERE NOT EXISTS (
     WHERE F.CPF = C.CPF
 );
 
+-- "Nome dos usuários que não possuem plano Premium."
+SELECT U.nome
+FROM USUARIO U
+WHERE NOT EXISTS (
+    SELECT *
+    FROM PREMIUM P
+    WHERE P.CPF = U.CPF
+);
 
 ---------------------------------------------------------
 -- 5) SUBCONSULTA ESCALAR
@@ -61,7 +93,11 @@ WHERE A.VALOR = (
     SELECT MAX(VALOR)
     FROM ASSINATURA
 );
-
+-- "Projetar o título e a diferença entre a duração da música e a média de duração de todas as músicas."
+SELECT M.titulo, 
+       M.duracao - (SELECT AVG(duracao) FROM MUSICA) AS diferenca
+FROM MUSICA M
+WHERE M.duracao > (SELECT AVG(duracao) FROM MUSICA);
 
 ---------------------------------------------------------
 -- 6) SUBCONSULTA DE LINHA
@@ -77,7 +113,18 @@ WHERE (CR.AGENCIA, CR.CONTA) = (
     FROM CRIADOR
     WHERE CPF = '111.222.333-44'
 );
-
+-- "Projetar os usuários premium que possuem o mesmo tipo de assinatura que o usuário com CPF = '222.333.444-55'."
+SELECT P.CPF, 
+       U.NOME,
+       A.ID_ASSINATURA
+FROM PREMIUM P
+INNER JOIN USUARIO U ON P.CPF = U.CPF
+INNER JOIN ASSINA A ON P.CPF = A.CPF
+WHERE (A.ID_ASSINATURA, A.ID_DESCONTO)= (
+    SELECT A.id_assinatura,A.ID_DESCONTO
+    FROM ASSINA A
+    WHERE A.CPF = '222.333.444-55'
+);
 
 ---------------------------------------------------------
 -- 7) SUBCONSULTA DE TABELA
@@ -92,6 +139,15 @@ WHERE M.ID_ALBUM IN (
     WHERE AL.GENERO = 'Rock'
 );
 
+-- "Nome dos usuários que possuem álbuns de mais de um gênero."
+SELECT U.nome
+FROM USUARIO U
+WHERE U.CPF IN (
+    SELECT A.CPF 
+    FROM ALBUM A
+    GROUP BY A.CPF
+    HAVING COUNT(DISTINCT A.genero) > 1
+);
 
 ---------------------------------------------------------
 -- 8) "Projetar o CPF de quem segue (seguidor) e de quem é seguido (seguido)."

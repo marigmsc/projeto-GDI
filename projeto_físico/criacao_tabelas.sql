@@ -125,7 +125,8 @@ VALUES
 ('555.666.777-88', 'Rafaela Moura',    'rafam_1@gmail.com',           '(48) 9342-8776', '(48) 9123-6722'),
 ('666.777.888-99', 'Lucas Pereira',    'luccasppp@hotmail.com',       '(61) 9665-4432', '(61) 9001-5589'),
 ('777.888.999-00', 'Beatriz Caruso',   'car_bia3@gmail.com',          '(71) 9802-1459', '(71) 9300-3298'),
-('888.999.000-11', 'Carlos Alberto',   'calberto@gmail.com',          '(85) 9055-3314', '(85) 9521-6670');
+('888.999.000-11', 'Carlos Alberto',   'calberto@gmail.com',          '(85) 9055-3314', '(85) 9521-6670'),
+('055.200.300-45', 'Maria Silva',      'masilva@outlook.com',         '(86) 9940-3411',  NULL);
 
 -----------------------------------------------------------
 -- TABELA: CONTA_BANCARIA
