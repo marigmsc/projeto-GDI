@@ -6,10 +6,17 @@ CREATE TABLE USUARIO(
     telefone2 VARCHAR(14)
 );
 
+CREATE TABLE CONTA_BANCARIA (
+    agencia VARCHAR(5), 
+    conta VARCHAR(8), 
+    CPF VARCHAR(20),
+    PRIMARY KEY (agencia, conta)
+);
+
 CREATE TABLE CRIADOR (
     CPF VARCHAR(20) PRIMARY KEY, 
-    agencia VARCHAR(5) NOT NULL, 
-    conta VARCHAR(8) NOT NULL,
+    agencia VARCHAR(5) UNIQUE NOT NULL, 
+    conta VARCHAR(8) UNIQUE NOT NULL,
     CONSTRAINT criador_fk FOREIGN KEY (CPF) REFERENCES USUARIO(CPF), 
     CONSTRAINT agencia_fk FOREIGN KEY (agencia, conta) REFERENCES CONTA_BANCARIA(agencia, conta)
 );
@@ -25,7 +32,8 @@ CREATE TABLE MUSICA (
     id_album NUMBER NOT NULL, 
     titulo VARCHAR(45), 
     duracao NUMBER, 
-    capa VARCHAR(45)
+    capa VARCHAR(45),
+    genero VARCHAR(45)
 );
 
 CREATE TABLE ALBUM (
@@ -58,7 +66,7 @@ CREATE TABLE FAZ(
 CREATE TABLE CRIA(
     id_musica NUMBER, 
     id_playlist NUMBER, 
-    CPF VARCHAR(20),
+    CPF VARCHAR(20) NOT NULL,
     PRIMARY KEY (id_musica, id_playlist),
     CONSTRAINT id_musica_cria_fk FOREIGN KEY (id_musica) REFERENCES MUSICA(id_musica),
     CONSTRAINT id_playlist_fk FOREIGN KEY (id_playlist) REFERENCES PLAYLIST(id_playlist)
@@ -77,6 +85,12 @@ CREATE TABLE DESCONTO(
     percentual  NUMBER(5,2)
 );
 
+CREATE TABLE ASSINATURA(
+    id_assinatura NUMBER PRIMARY KEY,
+    tipo VARCHAR(45),
+    valor NUMBER
+);
+
 CREATE TABLE ASSINA(
     CPF VARCHAR(20), 
     id_assinatura NUMBER, 
@@ -87,29 +101,15 @@ CREATE TABLE ASSINA(
     CONSTRAINT id_desconto_fk FOREIGN KEY (id_desconto) REFERENCES DESCONTO(id_desconto)
 );
 
-CREATE TABLE ASSINATURA(
-    id_assinatura NUMBER PRIMARY KEY,
-    tipo VARCHAR(45),
-    valor NUMBER
-);
-
 CREATE TABLE EVENTO (
     CPF VARCHAR(20), 
     numEvento NUMBER, 
     data DATE, 
-    CEP VARCHAR(9), 
-    numero NUMBER,
+    end_CEP VARCHAR(9), 
+    end_numero NUMBER,
     PRIMARY KEY (CPF, numEvento),
     CONSTRAINT CPF_artista_evento_fk FOREIGN KEY (CPF) REFERENCES CRIADOR(CPF)
 );
-
-CREATE TABLE CONTA_BANCARIA (
-    agencia VARCHAR(5), 
-    conta VARCHAR(8), 
-    CPF VARCHAR(20),
-    PRIMARY KEY (agencia, conta)
-);
-
 
 --- Povoamento ---
 
@@ -172,17 +172,19 @@ VALUES
 -----------------------------------------------------------
 -- TABELA: EVENTO
 -----------------------------------------------------------
-INSERT INTO EVENTO (cod, nome, sigla, ano)
+INSERT INTO EVENTO (CPF, numEvento, data, end_CEP,end_numero)
 VALUES
-(1, 'Festival Universitário de Música',        'FUM', 2023),
-(2, 'Semana Brasileira de Engenharia',         'SBE', 2024),
-(3, 'Hackathon Nacional de Inovação',          'HNI', 2023),
-(4, 'Congresso Internacional de Tecnologia',   'CIT', 2025),
-(5, 'Encontro de Inteligência Artificial',     'EIA', 2023),
-(6, 'Simpósio de Startups e Empreendedorismo', 'SSE', 2024),
-(7, 'Feira de Ciências e Inovação',            'FCI', 2025),
-(8, 'Workshop Avançado de Desenvolvimento',    'WAD', 2024);
-
+('111.222.333-44', 1, TO_DATE('02/05/2023','DD/MM/YYYY'), '01001-000', 123),
+('111.222.333-44', 2, TO_DATE('04/01/2024','DD/MM/YYYY'), '04538-132', 456),
+('111.222.333-44', 3, TO_DATE('13/05/2024','DD/MM/YYYY'), '50010-902', 321),
+('222.333.444-55', 4, TO_DATE('12/08/2023','DD/MM/YYYY'), '03047-010', 234),
+('222.333.444-55', 5, TO_DATE('30/05/2024','DD/MM/YYYY'), '52041-040', 654),
+('333.444.555-66', 6, TO_DATE('25/12/2024','DD/MM/YYYY'), '51200-020', 345),
+('444.555.666-77', 7, TO_DATE('04/04/2025','DD/MM/YYYY'), '20010-000', 101),
+('555.666.777-88', 8, TO_DATE('21/07/2025','DD/MM/YYYY'), '22041-001', 200),
+('666.777.888-99', 9, TO_DATE('06/11/2025','DD/MM/YYYY'), '23052-090', 300),
+('777.888.999-00', 10, TO_DATE('07/07/2024','DD/MM/YYYY'), '64000-200', 111),
+('888.999.000-11', 11, TO_DATE('28/08/2025','DD/MM/YYYY'), '64019-245', 222);
 -----------------------------------------------------------
 -- TABELA: ALBUM
 -----------------------------------------------------------
