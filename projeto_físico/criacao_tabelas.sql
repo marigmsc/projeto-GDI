@@ -68,7 +68,8 @@ CREATE TABLE CRIA(
     CPF VARCHAR(20) NOT NULL,
     PRIMARY KEY (id_musica, id_playlist),
     CONSTRAINT id_musica_cria_fk FOREIGN KEY (id_musica) REFERENCES MUSICA(id_musica),
-    CONSTRAINT id_playlist_fk FOREIGN KEY (id_playlist) REFERENCES PLAYLIST(id_playlist)
+    CONSTRAINT id_playlist_fk FOREIGN KEY (id_playlist) REFERENCES PLAYLIST(id_playlist),
+    CONSTRAINT cpf_usuario_fk FOREIGN KEY (CPF) REFERENCES USUARIO(CPF)
 );
 
 CREATE TABLE SEGUE(
