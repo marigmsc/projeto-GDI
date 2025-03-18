@@ -29,7 +29,7 @@ CREATE TABLE PREMIUM (
 
 CREATE TABLE MUSICA (
     id_musica NUMBER PRIMARY KEY, 
-    id_album NUMBER NOT NULL, 
+    id_album NUMBER, 
     titulo VARCHAR(45), 
     duracao NUMBER, 
     capa VARCHAR(45)
