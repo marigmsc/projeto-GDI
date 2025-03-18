@@ -32,8 +32,7 @@ CREATE TABLE MUSICA (
     id_album NUMBER NOT NULL, 
     titulo VARCHAR(45), 
     duracao NUMBER, 
-    capa VARCHAR(45),
-    genero VARCHAR(45)
+    capa VARCHAR(45)
 );
 
 CREATE TABLE ALBUM (
