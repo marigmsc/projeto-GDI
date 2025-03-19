@@ -17,8 +17,74 @@ HAVING total_eventos = (
     FROM EVENTO
     GROUP BY CPF
 );
+
+-- "Projetar os ids dos albuns que possuem mais de 2 musicas"
+SELECT m.ID_ALBUM
+FROM MUSICA m
+GROUP BY m.ID_ALBUM
+HAVING count(*) > 2
+
+-- "Projetar os CPFs dos usuários que possuem pelo menos 2 seguidores"
+SELECT s.SEGUIDO AS CPF
+FROM SEGUE s
+GROUP BY s.SEGUIDO
+HAVING count(*) >= 2
+
+-- "Projetar os generos de playlists que tem mais músicas que a média de musicas por genero"
+SELECT p.GENERO
+FROM PLAYLIST p
+GROUP BY p.GENERO 
+HAVING count(*) > 
+(
+SELECT avg(qtd)
+FROM (SELECT count(*) AS qtd
+	FROM PLAYLIST p2
+	GROUP BY p2.GENERO
+	)
+)
+
 ---------------------------------------------------------
--- 2) OUTER JOIN
+-- 2) INNER JOIN
+-- "Exibir os usuários que não tiveram desconto na assinatura"
+---------------------------------------------------------
+SELECT u.nome
+FROM assina a
+INNER JOIN usuario u on u.CPF = a.CPF
+WHERE a.ID_DESCONTO IS NULL 
+
+-- Usuários premiums com o valor e o tipo da assinatura que possuem
+SELECT u.nome AS Nome_Usuario, 
+       a.tipo AS Tipo_Assinatura, 
+       a.valor AS Valor_Assinatura
+FROM usuario u
+INNER JOIN premium p ON u.CPF = p.CPF
+INNER JOIN assina asn ON p.CPF = asn.CPF
+INNER JOIN assinatura a ON asn.id_assinatura = a.id_assinatura;
+
+--"Projetar os títulos das músicas e o CPF de seu criador"
+SELECT m.TITULO, c.CPF
+FROM MUSICA m
+INNER JOIN FAZ f
+ON m.ID_MUSICA = f.ID_MUSICA
+INNER JOIN CRIADOR c
+ON f.CPF = c.CPF
+
+-- "Projetar os títulos das músicas e o título do álbum a qual ela pertence"
+SELECT m.TITULO, a.TITULO
+FROM MUSICA m 
+INNER JOIN ALBUM a
+ON m.ID_ALBUM = a.ID_ALBUM
+
+-- Projetar o nome da playlist e as músicas que ela possui
+SELECT p.TITULO AS titulo_playlist, m.TITULO AS titulo_musica
+FROM PLAYLIST p
+INNER JOIN CRIA c
+ON p.ID_PLAYLIST = c.ID_PLAYLIST
+INNER JOIN MUSICA m
+ON m.ID_MUSICA = c.ID_MUSICA
+
+---------------------------------------------------------
+-- 3) OUTER JOIN
 -- "Mostrar o nome de todos os criadores e o título do álbum (se existir).
 ---------------------------------------------------------
 SELECT U.CPF        AS NOME_CRIADOR,
@@ -35,7 +101,7 @@ FROM USUARIO U1
     LEFT OUTER JOIN USUARIO U2 ON S.seguidor = U2.CPF;
 
 ---------------------------------------------------------
--- 3) SEMI-JOIN (EXISTS)
+-- 4) SEMI-JOIN (EXISTS)
 -- "CPF dos criadores que já publicaram ao menos uma música."
 ---------------------------------------------------------
 SELECT C.CPF
@@ -57,7 +123,7 @@ WHERE EXISTS (
 
 
 ---------------------------------------------------------
--- 4) ANTI-JOIN(NOT EXISTS) 
+-- 5) ANTI-JOIN(NOT EXISTS) 
 -- "CPF dos criadores que nunca publicaram nenhuma música."
 ---------------------------------------------------------
 SELECT C.CPF
@@ -78,7 +144,7 @@ WHERE NOT EXISTS (
 );
 
 ---------------------------------------------------------
--- 5) SUBCONSULTA ESCALAR
+-- 6) SUBCONSULTA ESCALAR
 -- "Usuários que pagam o plano mais caro de assinatura."
 ---------------------------------------------------------
 SELECT U.NOME,
@@ -99,7 +165,7 @@ FROM MUSICA M
 WHERE M.duracao > (SELECT AVG(duracao) FROM MUSICA);
 
 ---------------------------------------------------------
--- 6) SUBCONSULTA DE LINHA
+-- 7) SUBCONSULTA DE LINHA
 -- "Projetar os títulos das playlists que tem o mesmo gênero e quantidade de músicas que a playlist de id 9
 --------------------------------------------------------- 
 SELECT P.TITULO
@@ -124,7 +190,7 @@ WHERE (A.ID_ASSINATURA, A.ID_DESCONTO)= (
 );
 
 ---------------------------------------------------------
--- 7) SUBCONSULTA DE TABELA
+-- 8) SUBCONSULTA DE TABELA
 -- "Mostrar as músicas (título e id_album) onde o álbum seja do gênero 'Rock'."
 ---------------------------------------------------------
 SELECT M.TITULO AS MUSICA,
@@ -147,7 +213,7 @@ WHERE U.CPF IN (
 );
 
 ---------------------------------------------------------
--- 8) "Projetar o CPF de quem segue (seguidor) e de quem é seguido (seguido)."
+-- 9) "Projetar o CPF de quem segue (seguidor) e de quem é seguido (seguido)."
 ---------------------------------------------------------
 SELECT seguidor AS CPF
 FROM SEGUE
@@ -165,25 +231,6 @@ INTERSECT
 
 SELECT seguido AS CPF
 FROM SEGUE;
-
-
----------------------------------------------------------
--- 9) "Exibir os usuários que não tiveram desconto na assinatura"
----------------------------------------------------------
-select u.nome
-from assina a
-inner join usuario u on u.CPF = a.CPF
-WHERE a.ID_DESCONTO IS NULL 
-
--- Usuários premiums com o valor e o tipo da assinatura que possuem
-SELECT u.nome AS Nome_Usuario, 
-       a.tipo AS Tipo_Assinatura, 
-       a.valor AS Valor_Assinatura
-FROM usuario u
-INNER JOIN premium p ON u.CPF = p.CPF
-INNER JOIN assina asn ON p.CPF = asn.CPF
-INNER JOIN assinatura a ON asn.id_assinatura = a.id_assinatura;
-
 
 ---------------------------------------------------------
 -- 10) "Projetar o CPF e o e-mail dos usuários que NINGUÉM segue."
