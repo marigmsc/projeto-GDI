@@ -27,22 +27,23 @@ CREATE TABLE PREMIUM (
     CONSTRAINT premium_fk FOREIGN KEY (CPF) REFERENCES USUARIO(CPF)
 );
 
+CREATE TABLE ALBUM (
+    id_album NUMBER PRIMARY KEY, 
+    CPF VARCHAR(20) NOT NULL, 
+    titulo VARCHAR(50), 
+    capa VARCHAR(45), 
+    genero VARCHAR(45), 
+    total_faixas NUMBER, 
+    CONSTRAINT CPF_criador_album_fk FOREIGN KEY (CPF) REFERENCES CRIADOR(CPF)
+);
+
 CREATE TABLE MUSICA (
     id_musica NUMBER PRIMARY KEY, 
     id_album NUMBER, 
     titulo VARCHAR(45), 
     duracao NUMBER, 
-    capa VARCHAR(45)
-);
-
-CREATE TABLE ALBUM (
-    id_album NUMBER PRIMARY KEY, 
-    CPF VARCHAR(20) NOT NULL, 
-    titulo VARCHAR(45), 
-    capa VARCHAR(45), 
-    genero VARCHAR(45), 
-    total_faixas NUMBER, 
-    CONSTRAINT CPF_criador_album_fk FOREIGN KEY (CPF) REFERENCES CRIADOR(CPF)
+    capa VARCHAR(45),
+    CONSTRAINT fk_album FOREIGN KEY(id_album) REFERENCES ALBUM(id_album)
 );
 
 CREATE TABLE PLAYLIST(
@@ -126,7 +127,8 @@ VALUES
 ('666.777.888-99', 'Lucas Pereira',    'luccasppp@hotmail.com',       '(61) 9665-4432', '(61) 9001-5589'),
 ('777.888.999-00', 'Beatriz Caruso',   'car_bia3@gmail.com',          '(71) 9802-1459', '(71) 9300-3298'),
 ('888.999.000-11', 'Carlos Alberto',   'calberto@gmail.com',          '(85) 9055-3314', '(85) 9521-6670'),
-('055.200.300-45', 'Maria Silva',      'masilva@outlook.com',         '(86) 9940-3411',  NULL);
+('055.200.300-45', 'Maria Silva',      'masilva@outlook.com',         '(86) 9940-3411',  NULL), --Usuário nem premium, nem criador
+('066.300.400-55', 'José Santos',      'jsantos@gmail.com',           '(86) 8504-7258', '(81) 8865-3321'); --Usuário criador sem músicas publicadas
 
 -----------------------------------------------------------
 -- TABELA: CONTA_BANCARIA
@@ -140,7 +142,8 @@ VALUES
 ('4432','56789012','555.666.777-88'),
 ('1234','67890123','666.777.888-99'),
 ('9090','78901234','777.888.999-00'),
-('8765','89012345','888.999.000-11');
+('8765','89012345','888.999.000-11'),
+('0133','45945103','066.300.400-55');
 
 -----------------------------------------------------------
 -- TABELA: CRIADOR
@@ -154,7 +157,8 @@ VALUES
 ('555.666.777-88', '4432', '56789012'),
 ('666.777.888-99', '1234', '67890123'),
 ('777.888.999-00', '9090', '78901234'),
-('888.999.000-11', '8765', '89012345');
+('888.999.000-11', '8765', '89012345'),
+('066.300.400-55', '0133', '45945103');
 
 -----------------------------------------------------------
 -- TABELA: PREMIUM
@@ -231,7 +235,8 @@ VALUES
 (5, 'Sertanejo Universitário',    'sertanejo_list.jpg',  'Sertanejo',  2),
 (6, 'Eletrônica Pulsante',        'eletronica_list.jpg', 'Eletrônica', 6),
 (7, 'Canções Românticas',         'romanticas_list.jpg', 'Romântico',  3),
-(8, 'Pagode em Casa',             'pagode_list.jpg',     'Pagode',     4);
+(8, 'Pagode em Casa',             'pagode_list.jpg',     'Pagode',     4),
+(9, 'Top 50 Pop Global',           'top50_list.jpg',      'Pop',       0);
 
 -----------------------------------------------------------
 -- TABELA: ASSINATURA

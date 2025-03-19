@@ -22,13 +22,13 @@ HAVING total_eventos = (
 SELECT m.ID_ALBUM
 FROM MUSICA m
 GROUP BY m.ID_ALBUM
-HAVING count(*) > 2
+HAVING count(*) > 2;
 
 -- "Projetar os CPFs dos usuários que possuem pelo menos 2 seguidores"
 SELECT s.SEGUIDO AS CPF
 FROM SEGUE s
 GROUP BY s.SEGUIDO
-HAVING count(*) >= 2
+HAVING count(*) >= 2;
 
 -- "Projetar os generos de playlists que tem mais músicas que a média de musicas por genero"
 SELECT p.GENERO
@@ -41,7 +41,7 @@ FROM (SELECT count(*) AS qtd
 	FROM PLAYLIST p2
 	GROUP BY p2.GENERO
 	)
-)
+);
 
 ---------------------------------------------------------
 -- 2) INNER JOIN
@@ -50,7 +50,7 @@ FROM (SELECT count(*) AS qtd
 SELECT u.nome
 FROM assina a
 INNER JOIN usuario u on u.CPF = a.CPF
-WHERE a.ID_DESCONTO IS NULL 
+WHERE a.ID_DESCONTO IS NULL; 
 
 -- Usuários premiums com o valor e o tipo da assinatura que possuem
 SELECT u.nome AS Nome_Usuario, 
@@ -67,13 +67,13 @@ FROM MUSICA m
 INNER JOIN FAZ f
 ON m.ID_MUSICA = f.ID_MUSICA
 INNER JOIN CRIADOR c
-ON f.CPF = c.CPF
+ON f.CPF = c.CPF;
 
 -- "Projetar os títulos das músicas e o título do álbum a qual ela pertence"
 SELECT m.TITULO, a.TITULO
 FROM MUSICA m 
 INNER JOIN ALBUM a
-ON m.ID_ALBUM = a.ID_ALBUM
+ON m.ID_ALBUM = a.ID_ALBUM;
 
 -- Projetar o nome da playlist e as músicas que ela possui
 SELECT p.TITULO AS titulo_playlist, m.TITULO AS titulo_musica
@@ -81,7 +81,7 @@ FROM PLAYLIST p
 INNER JOIN CRIA c
 ON p.ID_PLAYLIST = c.ID_PLAYLIST
 INNER JOIN MUSICA m
-ON m.ID_MUSICA = c.ID_MUSICA
+ON m.ID_MUSICA = c.ID_MUSICA;
 
 ---------------------------------------------------------
 -- 3) OUTER JOIN
@@ -99,6 +99,26 @@ SELECT U1.nome AS seguido,
 FROM USUARIO U1
     LEFT OUTER JOIN SEGUE S ON U1.CPF = S.seguido
     LEFT OUTER JOIN USUARIO U2 ON S.seguidor = U2.CPF;
+
+--"Projetar o títitulo das playlists sem músicas associadas usando LEFT OUTER JOIN" 
+SELECT p.titulo AS playlist
+FROM PLAYLIST p
+LEFT OUTER JOIN CRIA c ON p.id_playlist = c.id_playlist
+WHERE c.id_playlist IS NULL;
+
+--"Nome dos criadores que não possuem músicas publicadas"
+SELECT U.nome
+FROM CRIADOR C
+     LEFT OUTER JOIN FAZ F ON C.CPF = F.CPF
+     INNER JOIN USUARIO u ON c.CPF = u.CPF
+WHERE f.id_musica IS NULL;
+
+--Listar a quantidade de eventos por CPF dos criadores(até aqueles que não possuem eventos)
+SELECT c.CPF, COUNT(e.NUMEVENTO) AS total_eventos
+FROM CRIADOR c
+LEFT OUTER JOIN EVENTO e ON c.CPF = e.CPF
+GROUP BY c.CPF
+ORDER BY total_eventos DESC;
 
 ---------------------------------------------------------
 -- 4) SEMI-JOIN (EXISTS)
