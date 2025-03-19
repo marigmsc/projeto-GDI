@@ -21,11 +21,10 @@ HAVING total_eventos = (
 -- 2) OUTER JOIN
 -- "Mostrar o nome de todos os criadores e o título do álbum (se existir).
 ---------------------------------------------------------
-SELECT U.NOME        AS NOME_CRIADOR,
+SELECT U.CPF        AS NOME_CRIADOR,
        AL.TITULO     AS TITULO_ALBUM
 FROM CRIADOR C
      LEFT OUTER JOIN ALBUM AL ON C.CPF = AL.CPF
-     INNER JOIN USUARIO U     ON C.CPF = U.CPF
 ORDER BY U.NOME;
 
 -- "Listar o nome de todos os usuários e por quem eles são seguidos (se houver seguidores)."
@@ -158,13 +157,32 @@ UNION
 SELECT seguido AS CPF
 FROM SEGUE;
 
+-- Seguidores mutuais
+SELECT seguidor AS CPF
+FROM SEGUE
+
+INTERSECT
+
+SELECT seguido AS CPF
+FROM SEGUE;
+
 
 ---------------------------------------------------------
--- 9) "Contar quantos usuários utilizam e-mail do Gmail (LIKE '%@gmail.com')."
+-- 9) "Exibir os usuários que não tiveram desconto na assinatura"
 ---------------------------------------------------------
-SELECT COUNT(*) AS TOTAL_GMAIL_USERS
-FROM USUARIO
-WHERE email LIKE '%@gmail.com';
+select u.nome
+from assina a
+inner join usuario u on u.CPF = a.CPF
+WHERE a.ID_DESCONTO IS NULL 
+
+-- Usuários premiums com o valor e o tipo da assinatura que possuem
+SELECT u.nome AS Nome_Usuario, 
+       a.tipo AS Tipo_Assinatura, 
+       a.valor AS Valor_Assinatura
+FROM usuario u
+INNER JOIN premium p ON u.CPF = p.CPF
+INNER JOIN assina asn ON p.CPF = asn.CPF
+INNER JOIN assinatura a ON asn.id_assinatura = a.id_assinatura;
 
 
 ---------------------------------------------------------
