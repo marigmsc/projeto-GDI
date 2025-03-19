@@ -141,6 +141,33 @@ WHERE EXISTS (
     WHERE C.CPF = U.CPF
 );
 
+-- Usuários que seguem pelo menos um usuário
+SELECT u.cpf
+from usuario u
+where exists (
+    select 1
+    from SEGUE s
+    where u.cpf = s.SEGUIDOR
+)
+
+-- Usuários que assinaram um plano com desconto
+SELECT U.CPF
+FROM USUARIO U
+WHERE EXISTS (
+    SELECT 1
+    FROM ASSINA A
+    WHERE A.CPF = U.CPF
+      AND A.id_desconto IS NOT NULL
+);
+
+-- Usuários que participaram de pelo menos um evento
+SELECT C.CPF
+FROM CRIADOR C
+WHERE EXISTS (
+    SELECT 1
+    FROM EVENTO E
+    WHERE E.CPF = C.CPF
+);
 
 ---------------------------------------------------------
 -- 5) ANTI-JOIN(NOT EXISTS/NOT IN) 
@@ -240,6 +267,39 @@ WHERE U.CPF IN (
     GROUP BY A.CPF
     HAVING COUNT(DISTINCT A.genero) > 1
 );
+
+-- Àlbum com quantidade de músicas acima da média
+SELECT id_album, titulo
+FROM ALBUM
+WHERE total_faixas > (
+    SELECT AVG(total_faixas)
+    FROM ALBUM
+);
+
+
+-- Usuários com músicas com duração acima da média
+SELECT C.CPF
+FROM CRIADOR C
+WHERE C.CPF IN (
+    SELECT F.CPF
+    FROM FAZ F
+    JOIN MUSICA M ON F.id_musica = M.id_musica
+    WHERE M.duracao > (
+        SELECT AVG(duracao)
+        FROM MUSICA
+    )
+);
+
+-- Músicas do àlbum mais longo
+SELECT titulo
+FROM MUSICA
+WHERE id_album = (
+    SELECT id_album
+    FROM ALBUM
+    WHERE total_faixas = (SELECT MAX(total_faixas) FROM ALBUM)
+);
+
+
 
 ---------------------------------------------------------
 -- 9) "Projetar o CPF de quem segue (seguidor) e de quem é seguido (seguido)."
