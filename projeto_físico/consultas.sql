@@ -123,7 +123,7 @@ WHERE EXISTS (
 
 
 ---------------------------------------------------------
--- 5) ANTI-JOIN(NOT EXISTS) 
+-- 5) ANTI-JOIN(NOT EXISTS/NOT IN) 
 -- "CPF dos criadores que nunca publicaram nenhuma música."
 ---------------------------------------------------------
 SELECT C.CPF
@@ -141,6 +141,15 @@ WHERE NOT EXISTS (
     SELECT *
     FROM PREMIUM P
     WHERE P.CPF = U.CPF
+);
+
+-- "Projetar o CPF e o e-mail dos usuários que NINGUÉM segue."
+SELECT U.CPF,
+       U.EMAIL
+FROM USUARIO U
+WHERE U.CPF NOT IN (
+    SELECT SEGUIDO
+    FROM SEGUE
 );
 
 ---------------------------------------------------------
@@ -231,18 +240,6 @@ INTERSECT
 
 SELECT seguido AS CPF
 FROM SEGUE;
-
----------------------------------------------------------
--- 10) "Projetar o CPF e o e-mail dos usuários que NINGUÉM segue."
----------------------------------------------------------
-SELECT U.CPF,
-       U.EMAIL
-FROM USUARIO U
-WHERE U.CPF NOT IN (
-    SELECT SEGUIDO
-    FROM SEGUE
-);
-
 
 ----------- PLSQL -----------------
 
