@@ -101,18 +101,16 @@ WHERE M.duracao > (SELECT AVG(duracao) FROM MUSICA);
 
 ---------------------------------------------------------
 -- 6) SUBCONSULTA DE LINHA
--- "Projetar o CPF e o nome dos criadores que têm a mesma (agência, conta)
---  do criador com CPF '111.222.333-44'."
----------------------------------------------------------
-SELECT CR.CPF,
-       U.NOME
-FROM CRIADOR CR
-INNER JOIN USUARIO U ON CR.CPF = U.CPF
-WHERE (CR.AGENCIA, CR.CONTA) = (
-    SELECT AGENCIA, CONTA
-    FROM CRIADOR
-    WHERE CPF = '111.222.333-44'
-);
+-- "Projetar os títulos das playlists que tem o mesmo gênero e quantidade de músicas que a playlist de id 9
+--------------------------------------------------------- 
+SELECT P.TITULO
+FROM PLAYLIST P
+WHERE (P.GENERO, P.TOTAL_FAIXAS) = (
+	SELECT GENERO, TOTAL_FAIXAS
+	FROM PLAYLIST
+	WHERE ID_PLAYLIST = 9
+)
+
 -- "Projetar os usuários premium que possuem o mesmo tipo de assinatura que o usuário com CPF = '222.333.444-55'."
 SELECT P.CPF, 
        U.NOME,
@@ -215,4 +213,3 @@ END;
 -- Teste
 INSERT INTO MUSICA (id_musica, id_album, titulo, duracao, capa)
 VALUES (12, 1, 'Nova Faixa', 210, 'nova_faixa_album.jpg');
-
