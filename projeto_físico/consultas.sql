@@ -230,7 +230,7 @@ WHERE (P.GENERO, P.TOTAL_FAIXAS) = (
 	SELECT GENERO, TOTAL_FAIXAS
 	FROM PLAYLIST
 	WHERE ID_PLAYLIST = 9
-)
+);
 
 -- "Projetar os usuários premium que possuem o mesmo tipo de assinatura que o usuário com CPF = '222.333.444-55'."
 SELECT P.CPF, 
@@ -323,6 +323,8 @@ FROM SEGUE;
 
 ----------- PLSQL -----------------
 
+-- Procedimento: Printar a quantidade de álbuns de um criador
+
 CREATE OR REPLACE PROCEDURE ContarAlbunsPorCriador(cpf_criador IN VARCHAR2)
 IS
     total_albuns NUMBER;
@@ -339,6 +341,26 @@ END;
 
 -- Executa o procedimento para um criador específico
 EXEC ContarAlbunsPorCriador('111.222.333-44');
+
+-- Função: Retorna o valor ao ser pago a partir do CPF do Usuário Premium.
+CREATE OR REPLACE FUNCTION calcular_total_pago(p_cpf PREMIUM.CPF%TYPE)
+RETURN NUMBER IS
+    v_total NUMBER := 0;
+BEGIN
+    SELECT SUM(A.VALOR - (NVL(D.PERCENTUAL, 0) / 100) * A.VALOR)
+    INTO v_total
+    FROM ASSINA ass
+    INNER JOIN ASSINATURA a ON ass.id_assinatura = a.id_assinatura
+    LEFT JOIN DESCONTO D ON D.ID_DESCONTO = ass.ID_DESCONTO
+    INNER JOIN PREMIUM P ON P.CPF = ass.CPF
+    WHERE ass.CPF = p_cpf;
+
+    RETURN NVL(v_total, 0);
+END calcular_total_pago;
+--Executa a função:
+SELECT calcular_total_pago('111.222.333-44') FROM DUAL;
+
+
 
 -- Trigger
 
