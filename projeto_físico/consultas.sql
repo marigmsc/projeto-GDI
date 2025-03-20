@@ -303,7 +303,8 @@ WHERE id_album = (
 
 
 ---------------------------------------------------------
--- 9) "Projetar o CPF de quem segue (seguidor) e de quem é seguido (seguido)."
+-- 9) Operações de conjunto
+-- "Projetar o CPF de quem segue (seguidor) e de quem é seguido (seguido)."
 ---------------------------------------------------------
 SELECT seguidor AS CPF
 FROM SEGUE
@@ -321,6 +322,25 @@ INTERSECT
 
 SELECT seguido AS CPF
 FROM SEGUE;
+
+-- Criadores que também são premium
+SELECT CPF FROM CRIADOR
+INTERSECT
+SELECT CPF FROM PREMIUM;
+
+-- CPFs que são criadores ou usuários premium.
+SELECT CPF
+FROM CRIADOR
+
+UNION
+
+SELECT CPF
+FROM PREMIUM;
+
+-- Criadores que não são premium
+SELECT CPF FROM CRIADOR
+EXCEPT
+SELECT CPF FROM PREMIUM;
 
 ----------- PLSQL -----------------
 
