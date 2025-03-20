@@ -220,6 +220,26 @@ SELECT M.titulo,
 FROM MUSICA M
 WHERE M.duracao > (SELECT AVG(duracao) FROM MUSICA);
 
+-- "Número total de músicas em cada álbum"
+SELECT id_album, titulo, 
+       (SELECT COUNT(*) FROM MUSICA WHERE MUSICA.id_album = ALBUM.id_album) AS total_musicas
+FROM ALBUM;
+
+-- "Número total de playlists de cada gênero"
+SELECT genero,
+       (SELECT COUNT(*) 
+        FROM PLAYLIST p 
+        WHERE p.genero = pl.genero) AS total_playlists
+FROM PLAYLIST pl
+GROUP BY genero;
+
+-- "Valor da assinatura de cada usuário premium"
+SELECT U.CPF, U.nome, 
+       (SELECT valor FROM ASSINATURA A WHERE A.id_assinatura = S.id_assinatura) AS valor_assinatura
+FROM USUARIO U
+JOIN ASSINA S ON U.CPF = S.CPF;
+
+
 ---------------------------------------------------------
 -- 7) SUBCONSULTA DE LINHA
 -- "Projetar os títulos das playlists que tem o mesmo gênero e quantidade de músicas que a playlist de id 9
