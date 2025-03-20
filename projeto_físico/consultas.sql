@@ -547,6 +547,21 @@ END CalcularTotalPago;
 SELECT CalcularTotalPago('111.222.333-44') FROM DUAL;
 
 
+CREATE OR REPLACE FUNCTION contar_eventos_por_cpf(p_CPF IN VARCHAR2) 
+RETURN NUMBER 
+IS
+    v_total_eventos NUMBER;
+BEGIN
+    -- Conta quantos eventos existem para o CPF fornecido
+    SELECT COUNT(*) INTO v_total_eventos
+    FROM EVENTO
+    WHERE CPF = p_CPF;
+
+    -- Retorna o total de eventos
+    RETURN v_total_eventos;
+END;
+
+
 -- Gatilho
 
 CREATE OR REPLACE TRIGGER atualiza_faixas_album
@@ -562,3 +577,24 @@ END;
 -- Executa
 INSERT INTO MUSICA (id_musica, id_album, titulo, duracao, capa)
 VALUES (12, 1, 'Nova Faixa', 210, 'nova_faixa_album.jpg');
+
+
+CREATE OR REPLACE TRIGGER trg_before_insert_evento
+BEFORE INSERT ON EVENTO
+FOR EACH ROW
+DECLARE
+    v_evento_existente NUMBER;
+BEGIN
+    -- Verifica se já existe um evento para o mesmo criador na mesma data
+    SELECT COUNT(*)
+    INTO v_evento_existente
+    FROM EVENTO
+    WHERE CPF = :NEW.CPF
+      AND data = :NEW.data;
+
+    -- Se já existir um evento na mesma data, lança um erro
+    IF v_evento_existente > 0 THEN
+        RAISE_APPLICATION_ERROR(-20002, 'Conflito de datas: O criador ' || :NEW.CPF || ' já possui um evento agendado para ' || TO_CHAR(:NEW.data, 'DD/MM/YYYY'));
+    END IF;
+END;
+
