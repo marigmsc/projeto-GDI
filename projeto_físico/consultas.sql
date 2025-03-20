@@ -199,6 +199,27 @@ WHERE U.CPF NOT IN (
     FROM SEGUE
 );
 
+-- "Projetar músicas que não pertencem ao Gênero MPB."
+SELECT M.TITULO AS MUSICA, M.ID_ALBUM
+FROM MUSICA M
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM ALBUM AL
+    WHERE AL.ID_ALBUM = M.ID_ALBUM
+    AND AL.GENERO = 'MPB'
+);
+
+
+-- "Projetar músicas que não pertencem ao Gênero Rock."
+SELECT M.TITULO AS MUSICA, M.ID_ALBUM
+FROM MUSICA M
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM ALBUM AL
+    WHERE AL.ID_ALBUM = M.ID_ALBUM
+    AND AL.GENERO = 'Rock'
+);
+
 ---------------------------------------------------------
 -- 6) SUBCONSULTA ESCALAR
 -- "Usuários que pagam o plano mais caro de assinatura."
@@ -265,6 +286,32 @@ WHERE (A.ID_ASSINATURA, A.ID_DESCONTO)= (
     WHERE A.CPF = '222.333.444-55'
 );
 
+-- "Projetar os títulos das músicas que pertencem ao álbum 'Ideologia'"
+SELECT M.TITULO, M.ID_ALBUM
+FROM MUSICA M
+WHERE (M.ID_ALBUM) = (
+    SELECT AL.ID_ALBUM
+    FROM ALBUM AL
+    WHERE AL.TITULO = 'Ideologia'
+);
+
+-- "Projetar os títulos das músicas que pertencem ao álbum 'Acústico MTV'"
+SELECT M.TITULO, M.ID_ALBUM
+FROM MUSICA M
+WHERE (M.ID_ALBUM) = (
+    SELECT AL.ID_ALBUM
+    FROM ALBUM AL
+    WHERE AL.TITULO = 'Acústico MTV'
+);
+
+-- "Projetar os títulos das músicas que pertencem ao álbum 'Dois na Bossa'"
+SELECT M.TITULO, M.ID_ALBUM
+FROM MUSICA M
+WHERE (M.ID_ALBUM) = (
+    SELECT AL.ID_ALBUM
+    FROM ALBUM AL
+    WHERE AL.TITULO = 'Dois na Bossa'
+);
 ---------------------------------------------------------
 -- 8) SUBCONSULTA DE TABELA
 -- "Mostrar as músicas (título e id_album) onde o álbum seja do gênero 'Rock'."
