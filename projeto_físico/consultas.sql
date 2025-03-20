@@ -217,7 +217,7 @@ WHERE NOT EXISTS (
     SELECT 1
     FROM ALBUM AL
     WHERE AL.ID_ALBUM = M.ID_ALBUM
-    AND AL.GENERO = 'Rock'
+    AND AL.GENERO ='Rock'
 );
 
 ---------------------------------------------------------
@@ -524,6 +524,64 @@ EXCEPTION
         DBMS_OUTPUT.PUT_LINE('Erro ao listar usuário: ' || SQLERRM);
 END ListarUsuarios;
 
+--Procedimento: Relatório de músicas por gênero
+CREATE OR REPLACE PROCEDURE RelatorioMusicasPorGenero(
+    p_genero IN ALBUM.genero%TYPE
+)
+IS
+    CURSOR c_musicas IS
+        SELECT m.titulo, a.titulo AS album, m.duracao
+        FROM MUSICA m
+        JOIN ALBUM a ON m.id_album = a.id_album
+        WHERE a.genero = p_genero;
+    
+    v_vazio BOOLEAN := TRUE;  -- Variável para verificar se há resultados
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('Relatório para Gênero: ' || p_genero);
+
+    FOR music_rec IN c_musicas LOOP
+        v_vazio := FALSE; 
+        DBMS_OUTPUT.PUT_LINE(
+            'Música: ' || music_rec.titulo || 
+            ' | Álbum: ' || music_rec.album ||
+            ' | Duração: ' || music_rec.duracao || 's'
+        );
+    END LOOP;
+
+    IF v_vazio THEN
+        DBMS_OUTPUT.PUT_LINE('Nenhuma música encontrada para o gênero informado.');
+    END IF;
+END RelatorioMusicasPorGenero;
+
+
+-- Exemplo
+BEGIN
+    RelatorioMusicasPorGenero('Rock');
+END;
+
+-- Procedimento: Atualizar o total de faixas de um álbum
+
+CREATE OR REPLACE PROCEDURE AtualizarFaixasAlbum(
+    p_id_album IN ALBUM.id_album%TYPE
+)
+IS
+    v_count NUMBER;
+BEGIN
+    SELECT COUNT(*) INTO v_count
+    FROM MUSICA
+    WHERE id_album = p_id_album;
+
+    UPDATE ALBUM
+    SET total_faixas = v_count
+    WHERE id_album = p_id_album;
+
+    COMMIT;
+END AtualizarFaixasAlbum;
+
+-- Executa
+BEGIN
+    AtualizarFaixasAlbum(1);
+END;
 
 --------FUNÇÕES/GATILHOS--------------
 -- Função: Retorna o valor ao ser pago a partir do CPF do Usuário Premium.
@@ -546,7 +604,7 @@ END CalcularTotalPago;
 --Executa a função:
 SELECT CalcularTotalPago('111.222.333-44') FROM DUAL;
 
-
+-- Função: Contar eventos por CPF
 CREATE OR REPLACE FUNCTION contar_eventos_por_cpf(p_CPF IN VARCHAR2) 
 RETURN NUMBER 
 IS
@@ -562,7 +620,7 @@ BEGIN
 END;
 
 
--- Gatilho
+-- Gatilho: Atualizar as faixas de um álbum
 
 CREATE OR REPLACE TRIGGER atualiza_faixas_album
 AFTER INSERT ON MUSICA
@@ -578,6 +636,7 @@ END;
 INSERT INTO MUSICA (id_musica, id_album, titulo, duracao, capa)
 VALUES (12, 1, 'Nova Faixa', 210, 'nova_faixa_album.jpg');
 
+--Gatilho: 
 
 CREATE OR REPLACE TRIGGER trg_before_insert_evento
 BEFORE INSERT ON EVENTO
@@ -595,6 +654,48 @@ BEGIN
     -- Se já existir um evento na mesma data, lança um erro
     IF v_evento_existente > 0 THEN
         RAISE_APPLICATION_ERROR(-20002, 'Conflito de datas: O criador ' || :NEW.CPF || ' já possui um evento agendado para ' || TO_CHAR(:NEW.data, 'DD/MM/YYYY'));
-    END IF;
+    END IF;
 END;
 
+
+--Função: Contar seguidores
+
+CREATE OR REPLACE FUNCTION ContarSeguidores(
+    p_cpf IN USUARIO.CPF%TYPE
+) RETURN NUMBER
+IS
+    v_seguidores NUMBER;
+BEGIN
+    SELECT COUNT(*) INTO v_seguidores
+    FROM SEGUE
+    WHERE seguido = p_cpf;
+
+
+    RETURN v_seguidores;
+END ContarSeguidores;
+
+-- Executa
+SELECT ContarSeguidores('111.222.333-44') FROM DUAL;
+
+--Função: Verificar se um usuário é criador
+CREATE OR REPLACE FUNCTION VerificarCriador(
+    p_cpf IN USUARIO.CPF%TYPE
+) RETURN VARCHAR2
+IS
+    v_count NUMBER;
+    v_isCriador VARCHAR2(20);
+BEGIN
+    SELECT COUNT(*) INTO v_count
+    FROM CRIADOR
+    WHERE CPF = p_cpf;
+    IF v_count > 0 THEN
+        v_isCriador := 'É criador';
+    ELSE
+        v_isCriador := 'Não é criador';
+    END IF;
+
+    RETURN v_isCriador;
+END VerificarCriador;
+
+-- Executa
+SELECT VerificarCriador('111.222.333-44') FROM DUAL;
