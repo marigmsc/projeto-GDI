@@ -268,12 +268,13 @@ WHERE U.CPF IN (
     HAVING COUNT(DISTINCT A.genero) > 1
 );
 
--- Àlbum com quantidade de músicas acima da média
+-- Àlbuns com mais de 10 músicas
 SELECT id_album, titulo
 FROM ALBUM
 WHERE total_faixas > (
-    SELECT AVG(total_faixas)
+    SELECT MIN(total_faixas)
     FROM ALBUM
+    WHERE total_faixas > 10
 );
 
 
