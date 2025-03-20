@@ -148,7 +148,7 @@ where exists (
     select 1
     from SEGUE s
     where u.cpf = s.SEGUIDOR
-)
+);
 
 -- Usuários que assinaram um plano com desconto
 SELECT U.CPF
@@ -363,7 +363,48 @@ EXCEPT
 SELECT CPF FROM PREMIUM;
 
 ----------- PLSQL -----------------
+--------PROCEDIMENTOS--------------
 
+-- Procedimento : Criar Usuário Criador
+CREATE OR REPLACE PROCEDURE InserirUsuarioCriador(
+    p_cpf IN USUARIO.CPF%TYPE,
+    p_nome IN USUARIO.nome%TYPE,
+    p_email IN USUARIO.email%TYPE,
+    p_tel1 IN USUARIO.telefone1%TYPE,
+    p_tel2 IN USUARIO.telefone2%TYPE,
+    p_agencia IN CONTA_BANCARIA.agencia%TYPE,
+    p_conta IN CONTA_BANCARIA.conta%TYPE
+)
+IS
+BEGIN
+    INSERT INTO USUARIO (CPF, nome, email, telefone1, telefone2)
+    VALUES (p_cpf, p_nome, p_email, p_tel1, p_tel2);
+
+    INSERT INTO CONTA_BANCARIA (agencia, conta, CPF)
+    VALUES (p_agencia, p_conta, p_cpf);
+
+    INSERT INTO CRIADOR (CPF, agencia, conta)
+    VALUES (p_cpf, p_agencia, p_conta);
+
+    COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        RAISE;
+END InserirUsuarioCriador;
+
+-- Executa com parâmetros
+BEGIN
+    InserirUsuarioCriador(
+        '123.456.789-00', 
+        'Novo Usuário', 
+        'novo@email.com', 
+        '(11)9999-9999', 
+        NULL, 
+        '9999', 
+        '99999999'
+    );
+END;
 -- Procedimento: Printar a quantidade de álbuns de um criador
 
 CREATE OR REPLACE PROCEDURE ContarAlbunsPorCriador(cpf_criador IN VARCHAR2)
@@ -383,8 +424,64 @@ END;
 -- Executa o procedimento para um criador específico
 EXEC ContarAlbunsPorCriador('111.222.333-44');
 
+-- Procedimento: Listar todos os usuários com seu tipo (Premium, Criador ou Grátis)
+CREATE OR REPLACE PROCEDURE ListarUsuarios (cpf_usuario IN USUARIO.CPF%TYPE)
+IS
+    v_cpf USUARIO.CPF%TYPE;
+    v_nome USUARIO.NOME%TYPE;
+    v_email USUARIO.EMAIL%TYPE;
+    v_telefone1 USUARIO.TELEFONE1%TYPE;
+    v_telefone2 USUARIO.TELEFONE2%TYPE;
+
+    v_isPremium NUMBER := 0; -- 0 = Falso, 1 = Verdadeiro
+    v_isCriador NUMBER := 0;
+
+BEGIN
+    SELECT CPF, nome, email, telefone1, telefone2 
+    INTO v_cpf, v_nome, v_email, v_telefone1, v_telefone2
+    FROM USUARIO
+    WHERE CPF = cpf_usuario;
+
+    -- Verifica se o usuário é Premium
+    SELECT COUNT(*) INTO v_isPremium FROM PREMIUM WHERE CPF = cpf_usuario;
+
+    -- Verifica se o usuário é Criador
+    SELECT COUNT(*) INTO v_isCriador FROM CRIADOR WHERE CPF = cpf_usuario;
+
+    DBMS_OUTPUT.PUT_LINE('CPF: ' || v_cpf);
+    DBMS_OUTPUT.PUT_LINE('Nome: ' || v_nome);
+    DBMS_OUTPUT.PUT_LINE('E-mail: ' || v_email);
+    DBMS_OUTPUT.PUT_LINE('Telefone 1: ' || v_telefone1);
+    
+    IF v_telefone2 IS NOT NULL THEN
+        DBMS_OUTPUT.PUT_LINE('Telefone 2: ' || v_telefone2);
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('Telefone 2: Não cadastrado.');
+    END IF;
+
+    IF v_isPremium > 0 AND v_isCriador > 0 THEN
+        DBMS_OUTPUT.PUT_LINE('Tipo de Usuário: Premium e Criador');
+    ELSIF v_isPremium > 0 THEN
+        DBMS_OUTPUT.PUT_LINE('Tipo de Usuário: Premium');
+    ELSIF v_isCriador > 0 THEN
+        DBMS_OUTPUT.PUT_LINE('Tipo de Usuário: Criador');
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('Tipo de Usuário: Grátis');
+    END IF;
+
+    DBMS_OUTPUT.PUT_LINE('---------------------------');
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('Usuário não encontrado com CPF: ' || cpf_usuario);
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Erro ao listar usuário: ' || SQLERRM);
+END ListarUsuarios;
+
+
+--------FUNÇÕES/GATILHOS--------------
 -- Função: Retorna o valor ao ser pago a partir do CPF do Usuário Premium.
-CREATE OR REPLACE FUNCTION calcular_total_pago(p_cpf PREMIUM.CPF%TYPE)
+
+CREATE OR REPLACE FUNCTION CalcularTotalPago(p_cpf PREMIUM.CPF%TYPE)
 RETURN NUMBER IS
     v_total NUMBER := 0;
 BEGIN
@@ -397,13 +494,13 @@ BEGIN
     WHERE ass.CPF = p_cpf;
 
     RETURN NVL(v_total, 0);
-END calcular_total_pago;
+END CalcularTotalPago;
+
 --Executa a função:
-SELECT calcular_total_pago('111.222.333-44') FROM DUAL;
+SELECT CalcularTotalPago('111.222.333-44') FROM DUAL;
 
 
-
--- Trigger
+-- Gatilho
 
 CREATE OR REPLACE TRIGGER atualiza_faixas_album
 AFTER INSERT ON MUSICA
@@ -415,6 +512,6 @@ BEGIN
     WHERE id_album = :NEW.id_album;
 END;
 
--- Teste
+-- Executa
 INSERT INTO MUSICA (id_musica, id_album, titulo, duracao, capa)
 VALUES (12, 1, 'Nova Faixa', 210, 'nova_faixa_album.jpg');
