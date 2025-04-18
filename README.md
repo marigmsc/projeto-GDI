@@ -1,6 +1,6 @@
 # Projeto GDI
 
-Este repositório contém o desenvolvimento completo de um projeto de banco de dados relacional, proposto pela cadeira Gerenciamento de Dados e Informações. O banco de Dados foi projetado para uma plataforma de Streaming Digital, onde usuários podem criar músicas, playlists e eventos, além de interagir entre si e ter diferentes tipos de assinaturas.
+Este repositório contém o desenvolvimento completo de um projeto de banco de dados relacional, proposto pela cadeira Gerenciamento de Dados e Informações. O banco de Dados foi projetado para uma plataforma de Streaming Musical, onde usuários podem criar músicas, playlists e eventos, além de interagir entre si e ter diferentes tipos de assinaturas.
 
 ## 📁 Estrutura do Projeto
 
